@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'quiz_brain.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 QuizBrain quizBrain = QuizBrain();
 
@@ -28,114 +29,118 @@ class QuizPage extends StatefulWidget {
 }
 
 class _QuizPageState extends State<QuizPage> {
+  void alertFinished(context) {
+    Alert(
+      style: AlertStyle(
+        isCloseButton: false,
+      ),
+      context: context,
+      title: 'Finished',
+      content: Column(
+        children: [
+          Row(
+            children: quizBrain.scoreKeeper(),
+          ),
+          Text('Return to first question.')
+        ],
+      ),
+      buttons: [
+        DialogButton(
+          onPressed: () {
+            setState(
+              () {
+                quizBrain.resetAnswer();
+                Navigator.pop(context);
+              },
+            );
+          },
+          child: Text(
+            'Return',
+            style: TextStyle(color: Colors.white),
+          ),
+        )
+      ],
+      type: AlertType.info,
+    ).show();
+  }
+
+  void alertOutofQuestion(context, bool answer) {
+    if (quizBrain.outOfQuestion()) {
+      alertFinished(context);
+    } else {
+      setState(() {
+        quizBrain.checkAnswer(true);
+        quizBrain.nextQuestion();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (quizBrain.outOfQuestion()) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Expanded(
-            flex: 5,
-            child: Padding(
-              padding: EdgeInsets.all(10.0),
-              child: Center(
-                child: Text(
-                  quizBrain.getQuestionObj().questionText,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 25.0,
-                    color: Colors.white,
-                  ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Expanded(
+          flex: 5,
+          child: Padding(
+            padding: EdgeInsets.all(10.0),
+            child: Center(
+              child: Text(
+                quizBrain.getQuestionObj().questionText,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 25.0,
+                  color: Colors.white,
                 ),
               ),
             ),
           ),
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.all(15.0),
-              child: FlatButton(
-                textColor: Colors.white,
-                color: Colors.green,
-                child: Text(
-                  'True',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20.0,
-                  ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.all(15.0),
+            child: FlatButton(
+              textColor: Colors.white,
+              color: Colors.green,
+              child: Text(
+                'True',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20.0,
                 ),
-                onPressed: () {
-                  setState(() {
-                    quizBrain.checkAnswer(true);
-                    quizBrain.nextQuestion();
-                  });
-                  //The user picked true.
-                },
               ),
+              onPressed: () {
+                alertOutofQuestion(context, true);
+
+                //The user picked true.
+              },
             ),
           ),
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.all(15.0),
-              child: FlatButton(
-                color: Colors.red,
-                child: Text(
-                  'False',
-                  style: TextStyle(
-                    fontSize: 20.0,
-                    color: Colors.white,
-                  ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.all(15.0),
+            child: FlatButton(
+              color: Colors.red,
+              child: Text(
+                'False',
+                style: TextStyle(
+                  fontSize: 20.0,
+                  color: Colors.white,
                 ),
-                onPressed: () {
-                  setState(() {
-                    quizBrain.checkAnswer(false);
-                    quizBrain.nextQuestion();
-                  });
-                  //The user picked false.
-                },
               ),
+              onPressed: () {
+                alertOutofQuestion(context, false);
+                //The user picked false.
+              },
             ),
           ),
-          Row(
-            children: quizBrain.scoreKeeper(),
-          )
-        ],
-      );
-    } else {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'Finished',
-            style: TextStyle(color: Colors.white),
-          ),
-          Text(
-            'Your answers',
-            style: TextStyle(color: Colors.white),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: quizBrain.scoreKeeper(),
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          RaisedButton(
-            onPressed: () {
-              setState(() {
-                quizBrain.resetAnswer();
-              });
-            },
-            child: Text(
-              'return to first question',
-              style: TextStyle(
-                color: Colors.white,
-              ),
-            ),
-            color: Colors.blue,
-          ),
-        ],
-      );
-    }
+        ),
+        Row(
+          children: quizBrain.scoreKeeper(),
+        )
+      ],
+    );
   }
 }

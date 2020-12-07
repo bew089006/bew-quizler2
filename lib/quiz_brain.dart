@@ -49,10 +49,10 @@ class QuizBrain {
   }
 
   bool outOfQuestion() {
-    if (_questionNumber == _questions.length) {
-      return false;
-    } else {
+    if (_questionNumber == _questions.length - 1) {
       return true;
+    } else {
+      return false;
     }
   }
 
